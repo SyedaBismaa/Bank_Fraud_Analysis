@@ -118,6 +118,19 @@ Performed:
 * Hyperparameter Tuning using GridSearchCV
 * Decision Tree Visualization
 * Performance Evaluation
+  
+---
+
+## 📊 Model Comparison
+
+| Model | Accuracy | Key Observation |
+|--------|----------|-----------------|
+| Logistic Regression | **99.09%** | Very high overall accuracy but failed to identify most fraudulent transactions due to severe class imbalance. |
+| Decision Tree | **69.78%** | Lower overall accuracy but detected more fraudulent transactions, resulting in higher fraud recall at the cost of many false positives. |
+
+## Final Model Selection
+
+For fraud detection, **Decision Tree** was selected as the preferred model because detecting fraudulent transactions (higher recall) is more important than achieving high overall accuracy. Although Logistic Regression reported higher accuracy, it failed to correctly classify most fraud cases due to the highly imbalanced dataset.
 
 ---
 
