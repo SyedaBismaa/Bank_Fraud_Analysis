@@ -7,8 +7,10 @@ Created on Sun Jun 28 12:05:30 2026
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 import scorecardpy as sc
+from sklearn.tree import plot_tree
 
 #Models 
 from sklearn.model_selection import train_test_split
@@ -85,26 +87,58 @@ print(confusion_matrix(y_test, y_pred))
 print(classification_report(y_test, y_pred))
 
 #Decision Tree
-model=DecisionTreeClassifier()
 
-param_grid={
-    "max_depth":[3,5,7,10,15],
-    "min_samples_split":[2,5,10],
-    "criterion":["gini","entropy"]
-    }
+model = DecisionTreeClassifier(
+    random_state=42,
+    class_weight="balanced"
+)
 
-grid_search=GridSearchCV(
+param_grid = {
+    "criterion": ["gini", "entropy"],
+    "max_depth": [3, 5, 7, 10],
+    "min_samples_split": [20, 50, 100],
+    "min_samples_leaf": [10, 20, 50],
+    "max_features": ["sqrt", "log2"]
+}
+
+grid_search = GridSearchCV(
     estimator=model,
     param_grid=param_grid,
-    cv=5,
-    scoring="f1"
-    )
+    cv=3,                  # Faster than 5-fold
+    scoring="f1",
+    n_jobs=-1,             # Use all CPU cores
+    verbose=2
+)
 
-grid_search.fit(X_train,y_train)
-print(grid_search.best_params_)
-print(grid_search.best_score_)
+grid_search.fit(X_train, y_train)
 
+print("Best Parameters:", grid_search.best_params_)
+print("Best CV F1:", grid_search.best_score_)
 
+# Best Model
+best_tree = grid_search.best_estimator_
+
+# Prediction
+y_pred = best_tree.predict(X_test)
+
+# Evaluation
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print(confusion_matrix(y_test, y_pred))
 print(classification_report(y_test, y_pred))
+
+# Plot Tree
+plt.figure(figsize=(18,10))
+
+plot_tree(
+    best_tree,
+    feature_names=X.columns,
+    class_names=["Not Fraud", "Fraud"],
+    filled=True,
+    rounded=True,
+    max_depth=3,
+    fontsize=9
+)
+
+plt.show()
+
+#The dataset exhibited severe class imbalance (~0.9% fraudulent transactions). While Logistic Regression achieved high overall accuracy, it failed to identify fraudulent transactions effectively. The tuned Decision Tree improved fraud recall but generated many false positives, resulting in low precision.
